@@ -19,7 +19,7 @@ module Types
     type squareProg = Map<int, string>
     type boardProg  = {
             prog       : string;
-            squares    : Map<int, squareProg>
+            squares    : Map<int, square>
             usedSquare : int
             center     : coord
     

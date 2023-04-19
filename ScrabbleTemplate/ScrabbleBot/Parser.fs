@@ -161,9 +161,28 @@
     
     // 7.12
 
-    let parseSquareProg _ = failwith "not implemented"
+    let parseSquareProg = Map.map (fun _ -> run stmntParse >> getSuccess) >> stmntsToSquare
+    
+    // 7.13
+    
+    let parseBoardFun (s: string) (m: Map<int, square>) : boardFun =
+        stmntToBoardFun (run stmntParse s |> getSuccess) m
+    
+    // 7.14
 
-    let parseBoardProg _ = failwith "not implemented"
+    let parseBoardProg (s: string) (m: Map<int, square>) : boardProg = {
+        prog       = s
+        squares    = m
+        usedSquare = 0
+        center     = (0, 0)
+    
+        isInfinite = false
+        ppSquare   = ""
+    }
 
-    let mkBoard (bp : boardProg) : board = failwith "not implemented"
+    let mkBoard (bp : boardProg) : board = {
+        center = bp.center
+        defaultSquare = bp.squares |> Map.find 0
+        squares = parseBoardFun bp.prog bp.squares
+    }
 

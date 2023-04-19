@@ -1,8 +1,8 @@
-﻿module ImpParser
+﻿module internal ImpParser
 
     open Eval
-    open Microsoft.FSharp.Quotations
     open Types
+    open ScrabbleUtil
 
     (*
 
@@ -170,7 +170,7 @@
     
     // 7.14
 
-    let parseBoardProg (s: string) (m: Map<int, square>) : boardProg = {
+    let parseBoardProg (s: string) (m: Map<int, squareProg>) : boardProg = {
         prog       = s
         squares    = m
         usedSquare = 0
@@ -182,7 +182,7 @@
 
     let mkBoard (bp : boardProg) : board = {
         center = bp.center
-        defaultSquare = bp.squares |> Map.find 0
-        squares = parseBoardFun bp.prog bp.squares
+        defaultSquare = bp.squares |> Map.find 0 |> parseSquareProg
+        squares = bp.squares |> Map.map (fun _ -> parseSquareProg) |> parseBoardFun bp.prog
     }
 

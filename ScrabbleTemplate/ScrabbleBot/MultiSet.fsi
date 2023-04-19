@@ -1,6 +1,6 @@
 ﻿// Insert your MultiSet.fsi file here. All modules must be internal
 
-module MultiSet
+module internal MultiSet
 
     type MultiSet<'a>
 

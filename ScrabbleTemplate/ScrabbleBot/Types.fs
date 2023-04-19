@@ -1,8 +1,8 @@
 module Types
 
     open StateMonad
+    open ScrabbleUtil
     
-    type coord  = int * int 
     type word   = (char * int) list
     
     type squareFun = word -> int -> int -> Result<int, Error>
@@ -15,14 +15,3 @@ module Types
         defaultSquare : square
         squares       : boardFun
     }
-    
-    type squareProg = Map<int, string>
-    type boardProg  = {
-            prog       : string;
-            squares    : Map<int, square>
-            usedSquare : int
-            center     : coord
-    
-            isInfinite : bool   // For pretty-printing purposes only
-            ppSquare   : string // For pretty-printing purposes only
-        }

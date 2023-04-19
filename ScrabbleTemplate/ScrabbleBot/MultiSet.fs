@@ -1,6 +1,6 @@
 ﻿// Insert your MultiSet.fs file here. All modules must be internal
 
-module MultiSet
+module internal MultiSet
 
     type MultiSet<'a> = Temp of unit // Not implemented
 

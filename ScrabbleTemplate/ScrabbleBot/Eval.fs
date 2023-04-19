@@ -1,4 +1,4 @@
-﻿module Eval
+﻿module internal Eval
 
     open StateMonad
     open Types

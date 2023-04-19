@@ -1,4 +1,4 @@
-﻿module FParsecLight
+﻿module internal FParsecLight
 
     open FParsec
 

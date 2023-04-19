@@ -1,9 +1,9 @@
-module Types
+module internal Types
 
     open StateMonad
     open ScrabbleUtil
     
-    type word   = (char * int) list
+    type word = (char * int) list
     
     type squareFun = word -> int -> int -> Result<int, Error>
     type square = Map<int, squareFun>

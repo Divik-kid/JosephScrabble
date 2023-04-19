@@ -1,4 +1,4 @@
-module internal Dictionary
+module Dictionary
 
     open Microsoft.FSharp.Collections
 

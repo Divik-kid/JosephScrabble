@@ -1,4 +1,4 @@
-﻿module internal ImpParser
+﻿module internal Parser
 
     open Eval
     open Types

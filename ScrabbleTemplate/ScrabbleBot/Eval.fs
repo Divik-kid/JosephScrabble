@@ -2,6 +2,7 @@
 
     open StateMonad
     open Types
+    open ScrabbleUtil
 
     (* Code for testing *)
 

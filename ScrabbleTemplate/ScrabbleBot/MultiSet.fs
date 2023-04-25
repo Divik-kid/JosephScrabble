@@ -34,3 +34,10 @@
     |Xs s -> Map.fold f acc s 
 
     let foldBack f (Xs s) acc =  Map.foldBack f s acc
+    
+    let toList (Xs s) =
+        Map.fold (fun state k v ->
+            let rec aux acc = function
+                | 0u -> acc
+                | n  -> aux (k::acc) (n-1u)
+            aux state v) [] s

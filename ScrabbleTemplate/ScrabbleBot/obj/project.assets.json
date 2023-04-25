@@ -154,19 +154,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\vikto\\.nuget\\packages\\": {}
+    "C:\\Users\\Viktor\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
+      "projectUniqueName": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
       "projectName": "ScrabbleBot",
-      "projectPath": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
-      "packagesPath": "C:\\Users\\vikto\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\obj\\",
+      "projectPath": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
+      "packagesPath": "C:\\Users\\Viktor\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\vikto\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Viktor\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -175,7 +180,8 @@
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "C:\\Program Files\\dotnet\\sdk\\7.0.203\\FSharp\\library-packs": {},
-        "https://api.nuget.org/v3/index.json": {}
+        "https://api.nuget.org/v3/index.json": {},
+        "https://nuget.devexpress.com/ocwfHbgi2yir5zTvoKp2vV2lHe4nFS9xRi2VsJN1Mogrj7Ca9a/api": {}
       },
       "frameworks": {
         "net7.0": {

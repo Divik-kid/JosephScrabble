@@ -1,23 +1,30 @@
 {
   "version": 2,
-  "dgSpecHash": "qjrzyrrB+ecTdo0t2zeJmMZpNp6GAfwsiTCgu+Zb14JWVcuCC13q4zXnuLjAB31DkKp0G5TvvzI9TeNTWxZSvA==",
+  "dgSpecHash": "MqhvwlHPnbDplmJTLlM9N7r2iDwdgSacyZrJgkyn4B9pbX6qYZZmn47//JtZ+eRgeXS3elqZAHSO3sgChmVVDA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+  "projectFilePath": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
   "expectedPackageFiles": [
-    "C:\\Users\\vikto\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\fsharp.quotations.evaluator\\2.1.0\\fsharp.quotations.evaluator.2.1.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\fspickler\\5.3.2\\fspickler.5.3.2.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.io\\4.3.0\\system.io.4.3.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.reflection\\4.3.0\\system.reflection.4.3.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.reflection.emit.ilgeneration\\4.3.0\\system.reflection.emit.ilgeneration.4.3.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.reflection.emit.lightweight\\4.3.0\\system.reflection.emit.lightweight.4.3.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.reflection.primitives\\4.3.0\\system.reflection.primitives.4.3.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.runtime\\4.3.0\\system.runtime.4.3.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.text.encoding\\4.3.0\\system.text.encoding.4.3.0.nupkg.sha512",
-    "C:\\Users\\vikto\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512"
+    "C:\\Users\\Viktor\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\fsharp.quotations.evaluator\\2.1.0\\fsharp.quotations.evaluator.2.1.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\fspickler\\5.3.2\\fspickler.5.3.2.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.io\\4.3.0\\system.io.4.3.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.reflection\\4.3.0\\system.reflection.4.3.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.reflection.emit.ilgeneration\\4.3.0\\system.reflection.emit.ilgeneration.4.3.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.reflection.emit.lightweight\\4.3.0\\system.reflection.emit.lightweight.4.3.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.reflection.primitives\\4.3.0\\system.reflection.primitives.4.3.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.runtime\\4.3.0\\system.runtime.4.3.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.text.encoding\\4.3.0\\system.text.encoding.4.3.0.nupkg.sha512",
+    "C:\\Users\\Viktor\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\obj\\project.nuget.cache : Found invalid data while decoding."
+    }
+  ]
 }

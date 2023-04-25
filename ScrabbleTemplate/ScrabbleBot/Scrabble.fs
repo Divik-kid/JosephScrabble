@@ -48,9 +48,11 @@ module State =
         hand          : MultiSet.MultiSet<uint32>
         
         playerTurn    : uint32
+        
+        playedTiles   : coord -> (char * int) option
     }
 
-    let mkState b d pn h turn = {board = b; dict = d;  playerNumber = pn; hand = h; playerTurn = turn; }
+    let mkState b d pn h turn = {board = b; dict = d;  playerNumber = pn; hand = h; playerTurn = turn; playedTiles = fun _ -> None; }
 
     let board st         = st.board
     let dict st          = st.dict
@@ -61,18 +63,23 @@ module Scrabble =
     open System.Threading
 
     let playGame cstream pieces numPlayers timeout (st : State.state) =
+        let move (st: State.state) : (coord * (uint32 * (char * int))) list option =
+            Print.printHand pieces (State.hand st)
+
+            // remove the force print when you move on from manual input (or when you have learnt the format)
+            forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
+            let input =  System.Console.ReadLine()
+            let x = RegEx.parseMove input |> Some
+            None
 
         let rec aux (st : State.state) =
             if st.playerTurn = st.playerNumber then
-                Print.printHand pieces (State.hand st)
-
-                // remove the force print when you move on from manual input (or when you have learnt the format)
-                forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
-                let input =  System.Console.ReadLine()
-                let move = RegEx.parseMove input
-
-                debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-                send cstream (SMPlay move)
+                match move st with
+                | Some m ->
+                    debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+                    send cstream (SMPlay m)
+                | None   ->
+                    send cstream (SMChange (st.hand |> MultiSet.toList))
 
             let msg = recv cstream
             debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) msg) // keep the debug lines. They are useful.
@@ -90,6 +97,8 @@ module Scrabble =
                 (* Failed play. Update your state *)
                 let st' = st // This state needs to be updated
                 aux {st' with playerTurn = (st.playerTurn + 1u) % numPlayers}
+            | RCM (CMChangeSuccess newPieces) ->
+                aux {st with playerTurn = (st.playerTurn + 1u) % numPlayers; hand = MultiSet.ofList newPieces}
             | RCM (CMGameOver _) -> ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st

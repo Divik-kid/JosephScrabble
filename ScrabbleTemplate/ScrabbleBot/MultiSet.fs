@@ -41,3 +41,10 @@
                 | 0u -> acc
                 | n  -> aux (k::acc) (n-1u)
             aux state v) [] s
+    
+    let ofList l =
+        let rec aux acc = function
+        | []    -> acc
+        | (a, b)::xs -> aux (acc |> add a b) xs 
+        
+        aux empty l

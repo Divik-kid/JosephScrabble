@@ -50,20 +50,20 @@ $RECYCLE.BIN/
 *.userprefs
 
 # Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Bb]uild/
-_[Bb]uild/
-[Dd]eploy/
-_[Dd]eploy/
+**/[Dd]ebug/
+**/[Dd]ebugPublic/
+**/[Rr]elease/
+**/[Rr]eleases/
+**/x64/
+**/x86/
+**/bld/
+**/[Bb]in/
+**/[Oo]bj/
+**/[Ll]og/
+**/[Bb]uild/
+**/_[Bb]uild/
+**/[Dd]eploy/
+**/_[Dd]eploy/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -290,15 +290,15 @@ paket-files/
 
 
 ### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
+**/.vscode/*
+**/!.vscode/settings.json
 
 
 
 ### OSX ###
-.DS_Store
-.AppleDouble
-.LSOverride
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
 
 # Icon must end with two \r
 Icon
@@ -453,4 +453,6 @@ bower_components
 
 ### WebSharper ###
 Scripts/
-.idea/
+
+# IDE
+**/.idea/

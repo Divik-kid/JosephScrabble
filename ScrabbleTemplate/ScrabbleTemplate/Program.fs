@@ -54,6 +54,7 @@ let main argv =
     let players    = [("OxyphenButazone1", dictionary, Oxyphenbutazone.Scrabble.startGame)
                       ("JosephScrabble", dictionary, JosephScrabble.Scrabble.startGame)
                       ("OxyphenButazone2", dictionary, Oxyphenbutazone.Scrabble.startGame);]
+    //let players = [("JosephScrabble", dictionary, JosephScrabble.Scrabble.startGame)]
 
     // let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
 

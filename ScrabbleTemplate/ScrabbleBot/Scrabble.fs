@@ -47,12 +47,14 @@ module State =
         playerNumber  : uint32
         hand          : MultiSet.MultiSet<uint32>
         
+        numPlayers    : uint32
         playerTurn    : uint32
         
-        playedTiles   : coord -> (char * int) option
+        playedTiles   : coord list
+        playedLetters : coord -> (char * int) option
     }
 
-    let mkState b d pn h turn = {board = b; dict = d;  playerNumber = pn; hand = h; playerTurn = turn; playedTiles = fun _ -> None; }
+    let mkState b d pn h num turn = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = num; playerTurn = turn; playedTiles = []; playedLetters = fun _ -> None; }
 
     let board st         = st.board
     let dict st          = st.dict
@@ -62,15 +64,21 @@ module State =
 module Scrabble =
     open System.Threading
 
-    let playGame cstream pieces numPlayers timeout (st : State.state) =
+    let playGame cstream pieces timeout (st : State.state) =
         let move (st: State.state) : (coord * (uint32 * (char * int))) list option =
+            let surroundCoord ((x, y): coord) : coord list =
+                let l = [(x+1, y);(x-1, y);(x, y+1);(x, y-1)]
+                l |> List.filter (fun c -> st.playedLetters c = None)
             Print.printHand pieces (State.hand st)
+            let wordCoords = List.fold (fun s -> surroundCoord >> (@) s) [] st.playedTiles
+                             |> List.distinct
+                             |> (fun l -> if List.length st.playedTiles = 0 then [st.board.center] else l)
+                             
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
             forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             let input =  System.Console.ReadLine()
-            let x = RegEx.parseMove input |> Some
-            None
+            RegEx.parseMove input |> Some
 
         let rec aux (st : State.state) =
             if st.playerTurn = st.playerNumber then
@@ -88,17 +96,17 @@ module Scrabble =
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 let st' = st // This state needs to be updated
-                aux {st' with playerTurn = (st.playerTurn + 1u) % numPlayers}
+                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers}
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
                 let st' = st // This state needs to be updated
-                aux {st' with playerTurn = (st.playerTurn + 1u) % numPlayers}
+                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers}
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
                 let st' = st // This state needs to be updated
-                aux {st' with playerTurn = (st.playerTurn + 1u) % numPlayers}
+                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers}
             | RCM (CMChangeSuccess newPieces) ->
-                aux {st with playerTurn = (st.playerTurn + 1u) % numPlayers; hand = MultiSet.ofList newPieces}
+                aux {st with playerTurn = (st.playerTurn + 1u) % st.numPlayers; hand = MultiSet.ofList newPieces}
             | RCM (CMGameOver _) -> ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
@@ -130,5 +138,5 @@ module Scrabble =
                   
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles numPlayers timeout (State.mkState board dict playerNumber handSet playerTurn)
+        fun () -> playGame cstream tiles  timeout (State.mkState board dict playerNumber handSet numPlayers playerTurn)
         

@@ -939,24 +939,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Viktor\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\vikto\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+      "projectUniqueName": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
       "projectName": "ScrabbleTemplate",
-      "projectPath": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
-      "packagesPath": "C:\\Users\\Viktor\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\obj\\",
+      "projectPath": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+      "packagesPath": "C:\\Users\\vikto\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Viktor\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\vikto\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -965,15 +960,14 @@
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "C:\\Program Files\\dotnet\\sdk\\7.0.203\\FSharp\\library-packs": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://nuget.devexpress.com/ocwfHbgi2yir5zTvoKp2vV2lHe4nFS9xRi2VsJN1Mogrj7Ca9a/api": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj": {
-              "projectPath": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj"
+            "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj": {
+              "projectPath": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj"
             }
           }
         }
@@ -1019,13 +1013,5 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleTemplate\\obj\\project.nuget.cache : Found invalid data while decoding."
-    }
-  ]
+  }
 }

@@ -1,18 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "qqbEePgAbJEz74bwEv7v+87jmT661CJeRCK53IfWBHBYkd1KBk6OpOIy+5f/0bgVMRcSvtYvtMhFDjDM66dgfw==",
+  "dgSpecHash": "6CzA6DP7Neae4JSb9zeHMsRJB/3yLewGjRvZgQI8y2ZeVVvaIyho9DPTt64nc/5rNstG+iQGmLyI3MflX/nUqg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
+  "projectFilePath": "C:\\Users\\vikto\\Documents\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Viktor\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
-    "C:\\Users\\Viktor\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512"
+    "C:\\Users\\vikto\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
+    "C:\\Users\\vikto\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file C:\\Users\\Viktor\\Documents\\Homework\\BFUP\\JosephScrabble\\ScrabbleTemplate\\ScrabbleBot\\obj\\project.nuget.cache : Found invalid data while decoding."
-    }
-  ]
+  "logs": []
 }

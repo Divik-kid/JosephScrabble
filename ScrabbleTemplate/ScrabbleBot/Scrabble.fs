@@ -52,7 +52,7 @@ module State =
         playerTurn    : uint32
         
         playedTiles   : coord list
-        playedLetters : coord -> (char * int) option
+        playedLetters : Map<int, Map<int, char*int>>
         
         startTime     : DateTime
     }
@@ -65,7 +65,7 @@ module State =
         numPlayers = num
         playerTurn = turn
         playedTiles = []
-        playedLetters = fun _ -> None
+        playedLetters = Map.empty
         startTime = curTime;
     }
 
@@ -74,14 +74,31 @@ module State =
     let playerNumber st  = st.playerNumber
     let hand st          = st.hand
 
+
 module Scrabble =
     open System.Threading
     
+    let getLetter ((x, y): coord) (m: Map<int, Map<int, char*int>>) : (char*int) option =
+        match m |> Map.tryFind x with
+        | Some m2 -> m2 |> Map.tryFind y
+        | None    -> None
+    
+    let noLetter (c: coord) = getLetter c >> (=) None
+    let hasLetter c m = noLetter c m |> not
+    
     let (..+..) ((x1, y1): coord) ((x2, y2): coord) : coord = (x1+x2, y1+y2)
     let (..*..) ((x, y): coord) (m: int) : coord = (x*m, y*m)
-
+    let invCoord (c: coord) : coord = c ..*.. -1
+    let rotateCord ((x, y): coord) : coord = (y, x)
+    let sideCords c = [c |> rotateCord; c |> invCoord |> rotateCord]
+    
+    let potentialStart (c: coord) m (dir: coord) : bool =
+        match hasLetter c m with
+        | true  -> noLetter (c ..+.. dir) m && hasLetter (c ..+.. (invCoord dir)) m
+        | false -> noLetter (c ..+.. dir) m && noLetter (c ..+.. (invCoord dir)) m
+    
     let playGame cstream pieces timeout (st : State.state) =
-        let findWord (st: State.state) (sideCoords: coord list) =
+        let findWord (st: State.state) (starts: (coord * coord) list) =
             let bestWord = None
             // TODO: Implement
             None
@@ -89,14 +106,19 @@ module Scrabble =
         
         let move (st: State.state) : (coord * (uint32 * (char * int))) list option =
             let surroundCoord ((x, y): coord) : coord list =
-                let l = [(x+1, y);(x-1, y);(x, y+1);(x, y-1)]
-                l |> List.filter (fun c -> st.playedLetters c = None)
+                [(x+1, y);(x-1, y);(x, y+1);(x, y-1)]
             Print.printHand pieces (State.hand st)
-            let wordCoords = List.fold (fun s -> surroundCoord >> (@) s) [] st.playedTiles
+            let wordStarts = List.fold (fun s -> surroundCoord >> (@) s) st.playedTiles st.playedTiles
                              |> List.distinct
                              |> (fun l -> if List.length st.playedTiles = 0 then [st.board.center] else l)
+                             |> List.fold (fun acc c ->
+                                 [(1, 0); (0, 1)]
+                                 |> List.fold (fun acc2 dir ->
+                                     match potentialStart c st.playedLetters dir with
+                                     | true  -> (c, dir)::acc2
+                                     | false -> acc2) acc) []
                              
-            findWord st wordCoords
+            findWord st wordStarts
             // remove the force print when you move on from manual input (or when you have learnt the format)
             //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             //let input =  System.Console.ReadLine()

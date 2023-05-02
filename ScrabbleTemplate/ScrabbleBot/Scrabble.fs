@@ -78,6 +78,8 @@ module State =
 module Scrabble =
     open System.Threading
     
+    let minScore = 1
+    
     let getLetter ((x, y): coord) (m: Map<int, Map<int, char*int>>) : (char*int) option =
         match m |> Map.tryFind x with
         | Some m2 -> m2 |> Map.tryFind y
@@ -94,14 +96,16 @@ module Scrabble =
     
     let potentialStart (c: coord) m (dir: coord) : bool =
         match hasLetter c m with
-        | true  -> noLetter (c ..+.. dir) m && hasLetter (c ..+.. (invCoord dir)) m
+        | true  -> noLetter (c ..+.. dir) m
         | false -> noLetter (c ..+.. dir) m && noLetter (c ..+.. (invCoord dir)) m
     
     let playGame cstream pieces timeout (st : State.state) =
         let findWord (st: State.state) (starts: (coord * coord) list) =
-            let bestWord = None
+            let mutable bestWord : int * (coord * (uint32 * (char * int))) list = (0, [])
             // TODO: Implement
-            None
+            match bestWord with
+            | n, _ when n < minScore -> None
+            | _, m                   -> Some m
             
         
         let move (st: State.state) : (coord * (uint32 * (char * int))) list option =

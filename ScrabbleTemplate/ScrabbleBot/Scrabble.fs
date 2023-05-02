@@ -77,6 +77,7 @@ module State =
 
 module Scrabble =
     open System.Threading
+    open System.Threading.Tasks
     
     let minScore = 1
     
@@ -99,10 +100,26 @@ module Scrabble =
         | true  -> noLetter (c ..+.. dir) m
         | false -> noLetter (c ..+.. dir) m && noLetter (c ..+.. (invCoord dir)) m
     
-    let playGame cstream pieces timeout (st : State.state) =
+    let playGame cstream pieces (timeout: int option) (st: State.state) =
         let findWord (st: State.state) (starts: (coord * coord) list) =
             let mutable bestWord : int * (coord * (uint32 * (char * int))) list = (0, [])
-            // TODO: Implement
+            let aux (start: coord) (dir: coord) =
+                None
+            
+            let startWord (start: coord, dir: coord) =
+                aux start dir |> ignore
+            
+            use cts = match timeout with
+                      | Some t -> new CancellationTokenSource((t |> float) * 0.98 |> int)
+                      | None   -> new CancellationTokenSource()
+            let po = ParallelOptions()
+            po.CancellationToken <- cts.Token
+            po.MaxDegreeOfParallelism <- Environment.ProcessorCount
+            try
+                Parallel.ForEach (starts, po, startWord) |> ignore
+            with
+            | :? OperationCanceledException -> printfn "Timeout"
+            
             match bestWord with
             | n, _ when n < minScore -> None
             | _, m                   -> Some m
@@ -186,5 +203,5 @@ module Scrabble =
                   
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles  timeout (State.mkState board dict playerNumber handSet numPlayers playerTurn DateTime.Now)
+        fun () -> playGame cstream tiles timeout (State.mkState board dict playerNumber handSet numPlayers playerTurn DateTime.Now)
         

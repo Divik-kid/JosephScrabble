@@ -100,14 +100,42 @@ module Scrabble =
         | true  -> noLetter (c ..+.. dir) m
         | false -> noLetter (c ..+.. dir) m && noLetter (c ..+.. (invCoord dir)) m
     
-    let playGame cstream pieces (timeout: int option) (st: State.state) =
+    let playGame cstream pieces (timeout: uint32 option) (st: State.state) =
         let findWord (st: State.state) (starts: (coord * coord) list) =
             let mutable bestWord : int * (coord * (uint32 * (char * int))) list = (0, [])
-            let aux (start: coord) (dir: coord) =
+            let rec aux (dict: Dictionary.Dict)
+                        (pos: coord)
+                        (start: coord)
+                        (dir: coord)
+                        (st: State.state)
+                        (moves: (coord * (uint32 * (char * int))) list)
+                        (isWord: bool)
+                        (score: (int * (int -> int)) list) =
+                match getLetter pos st.playedLetters with
+                | Some(c, p) ->
+                    match Dictionary.step c dict with
+                    | Some(b, newDict) -> aux newDict (pos ..+.. dir) start dir st moves b (((0, (fun acc -> p + acc))::score) |> List.sortBy fst)
+                    | None -> None
+                    |> ignore
+                | None ->
+                    // if is valid move
+                    if isWord && List.length moves > 0 then
+                        let curScore = (score |> List.fold (fun acc (_, f) -> f acc) 0)
+                        // if better scoring than current best move
+                        if curScore > (bestWord |> fst) then
+                            lock bestWord (fun () ->
+                                // double check that move is better, now that bestWord is locked
+                                if curScore > (bestWord |> fst) then
+                                    bestWord <- (curScore, moves))
+                            
+                    match Dictionary.reverse dict with
+                    | Some(b, newDict) -> aux newDict (start ..+.. (dir |> invCoord)) start (dir |> invCoord) st moves b score
+                    | None -> None
+                    |> ignore
                 None
             
             let startWord (start: coord, dir: coord) =
-                aux start dir |> ignore
+                aux st.dict start start (dir |> invCoord) st [] false [] |> ignore
             
             use cts = match timeout with
                       | Some t -> new CancellationTokenSource((t |> float) * 0.98 |> int)

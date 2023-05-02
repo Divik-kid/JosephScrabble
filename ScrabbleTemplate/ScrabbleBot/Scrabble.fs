@@ -7,6 +7,7 @@ open ScrabbleUtil.ServerCommunication
 open System.IO
 
 open ScrabbleUtil.DebugPrint
+open StateMonad
 
 // The RegEx module is only used to parse human input. It is not used for the final product.
 
@@ -94,6 +95,10 @@ module Scrabble =
     let invCoord (c: coord) : coord = c ..*.. -1
     let rotateCord ((x, y): coord) : coord = (y, x)
     let sideCords c = [c |> rotateCord; c |> invCoord |> rotateCord]
+    let addLetter ((x, y): coord) l (m : Map<int, Map<int, char*int>>) =
+        match m |> Map.tryFind x with
+        | Some m2 -> m |> Map.add x (m2 |> Map.add y l)
+        | None    -> m |> Map.add x (Map.empty |> Map.add y l)
     
     let potentialStart (c: coord) m (dir: coord) : bool =
         match hasLetter c m with
@@ -132,6 +137,14 @@ module Scrabble =
                     | Some(b, newDict) -> aux newDict (start ..+.. (dir |> invCoord)) start (dir |> invCoord) st moves b score
                     | None -> None
                     |> ignore
+                    
+                    match st.board.squares pos with
+                    | Success squareOpt ->
+                        match squareOpt with
+                        | Some sqr -> None // TODO: do word
+                        | None -> None // Edge of board
+                        |> ignore
+                    | Failure e -> failwith "failed to find square on board" // Should never happen
                 None
             
             let startWord (start: coord, dir: coord) =

@@ -1,6 +1,8 @@
 ﻿namespace JosephScrabble
 
 open System
+open System.Collections.Generic
+open Microsoft.FSharp.Collections
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
 
@@ -8,6 +10,7 @@ open System.IO
 
 open ScrabbleUtil.DebugPrint
 open StateMonad
+open Types
 
 // The RegEx module is only used to parse human input. It is not used for the final product.
 
@@ -107,9 +110,9 @@ module Scrabble =
         | true  -> noLetter (c ..+.. dir) m
         | false -> noLetter (c ..+.. dir) m && noLetter (c ..+.. (invCoord dir)) m
     
-    let playGame cstream pieces (timeout: uint32 option) (st: State.state) =
+    let playGame cstream (pieces: Map<uint32, tile>) (timeout: uint32 option) (st: State.state) =
         let findWord (st: State.state) (starts: (coord * coord) list) =
-            let mutable bestWord : int * (coord * (uint32 * (char * int))) list = (0, [])
+            let mutable bestWord : int * ((coord * (uint32 * (char * int))) list * word) = (0, ([], []))
             let rec aux (dict: Dictionary.Dict)
                         (pos: coord)
                         (start: coord)
@@ -117,40 +120,93 @@ module Scrabble =
                         (st: State.state)
                         (moves: (coord * (uint32 * (char * int))) list)
                         (isWord: bool)
-                        (score: (int * (int -> int)) list) =
+                        (word: word)
+                        (offset: int)
+                        (score: (int * square) list) =
+                let getScore (w: word) (score: (int * square) list) : int =
+                    score |> List.map fst |> List.min |> (fun minOffset ->
+                        score |> List.map (fun (i, s) -> (i-minOffset, s)))
+                    |> List.map (fun (i, s) ->
+                        s |> Map.toList
+                        |> List.fold (fun acc (prio, sq) ->
+                            (prio, sq word i)::acc) [])
+                    |> List.fold (@) []
+                    |> List.sortBy fst
+                    |> List.map snd
+                    |> List.fold (fun acc f ->
+                        match f acc with
+                        | Success i -> i
+                        | Failure _ -> failwith "Failed calculating points"(*This should never happen*)) 0
+                    
+                let incOffset i = i + if i <= 0 then -1 else 1
+                    
                 match getLetter pos st.playedLetters with
                 | Some(c, p) ->
                     match Dictionary.step c dict with
-                    | Some(b, newDict) -> aux newDict (pos ..+.. dir) start dir st moves b (((0, (fun acc -> p + acc))::score) |> List.sortBy fst)
+                    | Some(b, newDict) ->
+                        let (newScore: (int*square) list) =
+                            (offset, (Map.add Int32.MinValue (fun _ _ acc -> acc + p |> Success) Map.empty))::score
+                        aux newDict (pos ..+.. dir) start dir st moves b (word@[(c, p)]) (incOffset offset) newScore
                     | None -> None
                     |> ignore
                 | None ->
                     // if is valid move
                     if isWord && List.length moves > 0 then
-                        let curScore = (score |> List.fold (fun acc (_, f) -> f acc) 0)
+                        let curScore = getScore word score
                         // if better scoring than current best move
                         if curScore > (bestWord |> fst) then
                             lock bestWord (fun () ->
                                 // double check that move is better, now that bestWord is locked
                                 if curScore > (bestWord |> fst) then
-                                    bestWord <- (curScore, moves))
+                                    bestWord <- (curScore, (moves, word)))
                             
                     match Dictionary.reverse dict with
-                    | Some(b, newDict) -> aux newDict (start ..+.. (dir |> invCoord)) start (dir |> invCoord) st moves b score
+                    | Some(b, newDict) ->
+                        aux newDict (start ..+.. (dir |> invCoord)) start (dir |> invCoord) st moves b (word |> List.rev) 1 score
                     | None -> None
                     |> ignore
                     
                     match st.board.squares pos with
                     | Success squareOpt ->
                         match squareOpt with
-                        | Some sqr -> None // TODO: do word
-                        | None -> None // Edge of board
+                        | Some sqr ->
+                            (State.hand st) |> MultiSet.fold (fun acc letterId _ -> letterId::acc) []
+                            |> List.fold (fun _ lId ->
+                                let tile = Map.find lId pieces
+                                
+                                let newHand = (State.hand st) |> MultiSet.removeSingle lId
+                                tile |> Set.fold (fun _ (c, p) ->
+                                    match Dictionary.step c dict with
+                                    | None -> None
+                                    | Some (b, newDict) ->
+                                        let newWord = word@[(c, p)]
+                                        let newScore = (offset, sqr)::score
+                                        let newSt = { st with hand = newHand }
+                                        let newMoves = (pos, (lId, (c, p)))::moves
+                                        
+                                        // TODO: Find and check validity of parallel word and add parallel word score to newScore
+                                        
+                                        // hand-finishing bonus
+                                        let newScore = if MultiSet.isEmpty newHand then
+                                                            (offset, (Map.add Int32.MaxValue (fun _ _ acc -> (acc + 50) |> Success) Map.empty))::newScore
+                                                        else
+                                                            newScore
+                                        
+                                        aux newDict (pos ..+.. dir) start dir newSt newMoves b newWord (offset |> incOffset) newScore
+                                        |> ignore
+                                        None) None
+                                |> ignore
+                                
+                                None) None
+                            |> ignore
+                        | None -> None |> ignore // Edge of board
                         |> ignore
-                    | Failure e -> failwith "failed to find square on board" // Should never happen
+                    | Failure _ -> failwith "failed to find square on board" // Should never happen
+                    |> ignore
                 None
             
             let startWord (start: coord, dir: coord) =
-                aux st.dict start start (dir |> invCoord) st [] false [] |> ignore
+                aux st.dict start start (dir |> invCoord) st [] false [] 0 [] |> ignore
             
             use cts = match timeout with
                       | Some t -> new CancellationTokenSource((t |> float) * 0.98 |> int)
@@ -162,10 +218,14 @@ module Scrabble =
                 Parallel.ForEach (starts, po, startWord) |> ignore
             with
             | :? OperationCanceledException -> printfn "Timeout"
-            
+            forcePrint ("Word: "   + (bestWord |> snd |> snd
+                                      |> List.map fst
+                                      |> System.String.Concat) + "\n")
+            forcePrint ("Move: "   + (bestWord |> snd |> fst |> string) + "\n")
+            forcePrint ("Points: " + (bestWord |> fst        |> string) + "\n")
             match bestWord with
             | n, _ when n < minScore -> None
-            | _, m                   -> Some m
+            | _, m                    -> Some (m |> fst)
             
         
         let move (st: State.state) : (coord * (uint32 * (char * int))) list option =

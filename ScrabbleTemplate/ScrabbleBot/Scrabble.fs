@@ -74,6 +74,8 @@ module State =
     let dict st          = st.dict
     let playerNumber st  = st.playerNumber
     let hand st          = st.hand
+    let myPoints = ref 0 
+
 
 
 module Scrabble =
@@ -201,12 +203,23 @@ module Scrabble =
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
+                let myPoints = List.fold (fun acc (c, (pid, (ch, i))) -> i + acc) 0 ms
+                let playTiles = List.fold (fun acc (c, (pid, (ch, i))) -> c::acc) st.playedTiles ms
                 let st' = st // This state needs to be updated
-                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers}
+                debugPrint (sprintf "Played Tiles: %A\n" myPoints)
+                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers; playedTiles = playTiles}
             | RCM (CMPlayed (pid, ms, points)) ->
-                (* Successful play by other player. Update your state *)
+                (* Successful play by other player. Update your state *)  
                 let st' = st // This state needs to be updated
-                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers}
+                //plays the tiles of the other player
+                let playLett (i:int)(x,y) = st.playedLetters |> Map.tryFind x |> Option.map.TryFind y |> Option.map.Map.add i (c.Key, c.Value)
+                let playTile = List.fold (fun acc (c, (pid, (ch, i))) -> c::acc) st.playedTiles ms
+                //use the pid:uint32 to search the pieces map for a value and add it to the played letters
+               // let playLett = List.fold (Map.find pid pieces) st.playedLetters ms
+            
+                debugPrint (sprintf "Played Tiles: %A\n" st'.playedTiles)
+                //take the 
+                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers; playedTiles = playTile;}             
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
                 let st' = st // This state needs to be updated
@@ -217,7 +230,7 @@ module Scrabble =
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
-
+            
         aux st
 
     let startGame 

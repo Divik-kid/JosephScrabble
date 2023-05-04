@@ -275,17 +275,21 @@ module Scrabble =
                     |[] -> st'.playedLetters
                     |x::xs -> (addLetter (fst x) (snd (snd x))) (playLett xs)
 
+                let rec updateHand (h:MultiSet.MultiSet<uint32>)(p: list<uint32*uint32>)= 
+                    match p with 
+                    |[] -> st'.hand
+                    |x::xs -> List.fold (fun acc (x, k) -> MultiSet.add x k acc) h p
 
-                debugPrint (sprintf "LETTT: %A\n" st.playedLetters)
+                debugPrint (sprintf "LETTT: %A\n" st'.playedLetters)
                 debugPrint (sprintf "Played Tiles: %A\n" myPoints)
-                aux {st' with playerTurn = (st.playerTurn % st.numPlayers)  + 1u; playedTiles = playTiles ; playedLetters = playLett ms}  // This state needs to be updated
+                debugPrint (sprintf "HAAAND: %A\n" st.hand)
+                aux {st' with playerTurn = (st.playerTurn % st.numPlayers) + 1u; playedTiles = playTiles ; playedLetters = playLett ms; hand = updateHand st.hand newPieces}  // This state needs to be updated
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)  
                 let st' = st // This state needs to be updated
                 //plays the tiles of the other player
-                //let playLett (i:int)(x,y) = st.playedLetters |> Map.tryFind x |> Option.map.TryFind y |> Option.map.Map.add i (c.Key, c.Value)
-                let playTile = List.fold (fun acc (c, (pid, (ch, i))) -> c::acc) st.playedTiles ms
-    
+
+                let playTile = List.fold (fun acc (c: coord, (pid, (ch, i))) -> c::acc) st.playedTiles ms
                 let rec playLett (m: list<coord * (uint32 * (char * int))>) =
                     match m with 
                     |[] -> st'.playedLetters
@@ -296,8 +300,8 @@ module Scrabble =
                // let playLett = List.fold (Map.find pid pieces) st.playedLetters ms
                 debugPrint (sprintf "LETTT2: %A\n" st'.playedLetters)
                 debugPrint (sprintf "Played Tiles: %A\n" st'.playedTiles)
-                //take the 
-                aux {st' with playerTurn = (st.playerTurn % st.numPlayers)  + 1u; playedTiles = playTile; playedLetters = playLett ms}             
+              
+                aux {st' with playerTurn = (st.playerTurn % st.numPlayers) + 1u; playedTiles = playTile; playedLetters = playLett ms}             
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
                 let st' = st // This state needs to be updated

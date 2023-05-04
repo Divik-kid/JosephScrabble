@@ -11,16 +11,17 @@
     let contains a (Xs s) = s.ContainsKey(a)
     // 'a -> MultiSet<'a> -> uint32
 
-    let numItems a = function 
-    |Xs b -> if b.ContainsKey(a) then b.TryFind(a).Value else 0u
+    let numItems a (Xs m) =  
+        match Map.tryFind a m with
+        | Some v -> v
+        | None   -> 0u
 
     //'a -> uint32 -> MultiSet<'a> -> MultiSet<'a>
     let rec add a (n:uint32) =  function 
     |Xs s -> Xs (s.Add(a, (numItems a (Xs s)+n)))
 
     //'a -> MultiSet<'a> -> MultiSet<'a>
-    let addSingle a = function
-    |Xs s -> Xs (s.Add(a, (numItems a (Xs s)+1u)))
+    let addSingle a ms = add a 1u ms
 
     //'a -> uint32 -> MultiSet<'a> -> MultiSet<'a>
     let remove e n = function
@@ -52,3 +53,22 @@
         | (a, b)::xs -> aux (acc |> add a b) xs 
         
         aux empty l
+        
+    let map (f: 'a -> 'b) ms = fold (fun s k v -> add (f k) v s) empty ms
+    let union (ms1: MultiSet<'a>) (ms2: MultiSet<'a>) =
+            fold (fun s k v ->
+                if numItems k s < v then
+                    add k (v - numItems k s) s
+                else
+                    s
+            ) ms1 ms2
+    
+    let sum (ms1: MultiSet<'a>) (ms2: MultiSet<'a>) = fold (fun s k v -> add k v s) ms1 ms2
+    let subtract (ms1: MultiSet<'a>) (ms2: MultiSet<'a>) = fold (fun s k v -> remove k v s) ms1 ms2
+    let intersection (ms1: MultiSet<'a>) (ms2: MultiSet<'a>) = 
+            fold (fun s k v ->
+                if (numItems k ms1) > 0u then
+                    add k (min v (numItems k ms1)) s
+                else
+                    s
+            ) empty ms2

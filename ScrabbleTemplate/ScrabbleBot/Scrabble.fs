@@ -112,7 +112,7 @@ module Scrabble =
     
     let playGame cstream (pieces: Map<uint32, tile>) (timeout: uint32 option) (st: State.state) =
         let findWord (st: State.state) (starts: (coord * coord) list) =
-            let mutable bestWord : int * ((coord * (uint32 * (char * int))) list * word) = (0, ([], []))
+            let mutable bestWord : int * (((coord * (uint32 * (char * int))) list * MultiSet.MultiSet<uint32>) * word) = (0, (([], MultiSet.empty), []))
             let rec aux (dict: Dictionary.Dict)
                         (pos: coord)
                         (start: coord)
@@ -121,6 +121,7 @@ module Scrabble =
                         (moves: (coord * (uint32 * (char * int))) list)
                         (isWord: bool)
                         (word: word)
+                        (usedHand: MultiSet.MultiSet<uint32>)
                         (offset: int)
                         (score: (int * square) list) =
                 let getScore (w: word) (score: (int * square) list) : int =
@@ -146,7 +147,7 @@ module Scrabble =
                     | Some(b, newDict) ->
                         let (newScore: (int*square) list) =
                             (offset, (Map.add Int32.MinValue (fun _ _ acc -> acc + p |> Success) Map.empty))::score
-                        aux newDict (pos ..+.. dir) start dir st moves b (word@[(c, p)]) (incOffset offset) newScore
+                        aux newDict (pos ..+.. dir) start dir st moves b (word@[(c, p)]) usedHand (incOffset offset) newScore
                     | None -> None
                     |> ignore
                 | None ->
@@ -158,11 +159,11 @@ module Scrabble =
                             lock bestWord (fun () ->
                                 // double check that move is better, now that bestWord is locked
                                 if curScore > (bestWord |> fst) then
-                                    bestWord <- (curScore, (moves, word)))
+                                    bestWord <- (curScore, ((moves, usedHand), word)))
                             
                     match Dictionary.reverse dict with
                     | Some(b, newDict) ->
-                        aux newDict (start ..+.. (dir |> invCoord)) start (dir |> invCoord) st moves b (word |> List.rev) 1 score
+                        aux newDict (start ..+.. (dir |> invCoord)) start (dir |> invCoord) st moves b (word |> List.rev) usedHand 1 score
                     | None -> None
                     |> ignore
                     
@@ -192,7 +193,7 @@ module Scrabble =
                                                         else
                                                             newScore
                                         
-                                        aux newDict (pos ..+.. dir) start dir newSt newMoves b newWord (offset |> incOffset) newScore
+                                        aux newDict (pos ..+.. dir) start dir newSt newMoves b newWord (usedHand |> MultiSet.addSingle lId) (offset |> incOffset) newScore
                                         |> ignore
                                         None) None
                                 |> ignore
@@ -206,7 +207,7 @@ module Scrabble =
                 None
             
             let startWord (start: coord, dir: coord) =
-                aux st.dict start start (dir |> invCoord) st [] false [] 0 [] |> ignore
+                aux st.dict start start (dir |> invCoord) st [] false [] MultiSet.empty 0 [] |> ignore
             
             use cts = match timeout with
                       | Some t -> new CancellationTokenSource((t |> float) * 0.98 |> int)
@@ -220,7 +221,7 @@ module Scrabble =
             | :? OperationCanceledException -> printfn "Timeout"
             forcePrint ("Word: "   + (bestWord |> snd |> snd
                                       |> List.map fst
-                                      |> System.String.Concat) + "\n")
+                                      |> String.Concat) + "\n")
             forcePrint ("Move: "   + (bestWord |> snd |> fst |> string) + "\n")
             forcePrint ("Points: " + (bestWord |> fst        |> string) + "\n")
             match bestWord with
@@ -228,7 +229,7 @@ module Scrabble =
             | _, m                    -> Some (m |> fst)
             
         
-        let move (st: State.state) : (coord * (uint32 * (char * int))) list option =
+        let move (st: State.state) : ((coord * (uint32 * (char * int))) list * MultiSet.MultiSet<uint32>) option =
             let surroundCoord ((x, y): coord) : coord list =
                 [(x+1, y);(x-1, y);(x, y+1);(x, y-1)]
             Print.printHand pieces (State.hand st)
@@ -249,10 +250,12 @@ module Scrabble =
             //RegEx.parseMove input |> Some
 
         let rec aux (st : State.state) =
+            let mutable usedTiles = MultiSet.empty
             if st.playerTurn = st.playerNumber then
                 match move st with
-                | Some m ->
+                | Some (m, t) ->
                     debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+                    usedTiles <- t
                     send cstream (SMPlay m)
                 | None   ->
                     send cstream (SMChange (st.hand |> MultiSet.toList))

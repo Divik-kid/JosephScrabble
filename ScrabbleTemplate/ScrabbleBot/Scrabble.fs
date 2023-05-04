@@ -270,43 +270,31 @@ module Scrabble =
                 let playTiles = List.fold (fun acc (c, (pid, (ch, i))) -> c::acc) st.playedTiles ms
                 let st' = st // This state needs to be updated
                 
-                let rec playLett  =
-                    match st.playedLetters |> Map.tryFind (fst (fst (List.head (ms)) ) |> int ) with
-                    | Some innerMap ->
-                         innerMap |> Map.tryFind (snd (fst (List.head (ms)) ) |> int )
-                        |> function
-                        | Some _ -> st.playedLetters
-                        | None -> st.playedLetters |> Map.add (fst (fst (List.head (ms)) ) |> int ) (innerMap |> Map.add (snd (fst (List.head (ms)) ) |> int) (snd (snd (List.head (ms))) ) )
-                    | None ->
-                        st.playedLetters |> Map.add (fst (fst (List.head (ms)) ) |> int ) (Map.empty |> Map.add (snd (fst (List.head (ms)) ) |> int ) (snd (snd (List.head (ms)) ) ))
-                debugPrint (sprintf "LETTT: %A\n" playLett)
+                let rec playLett (m: list<coord * (uint32 * (char * int))>) =
+                    match m with 
+                    |[] -> st'.playedLetters
+                    |x::xs -> (addLetter (fst x) (snd (snd x))) (playLett xs)
 
+
+                debugPrint (sprintf "LETTT: %A\n" st.playedLetters)
                 debugPrint (sprintf "Played Tiles: %A\n" myPoints)
-                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers; playedTiles = playTiles ; playedLetters = playLett} // This state needs to be updated
+                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers; playedTiles = playTiles ; playedLetters = playLett ms}  // This state needs to be updated
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)  
                 let st' = st // This state needs to be updated
                 //plays the tiles of the other player
                 //let playLett (i:int)(x,y) = st.playedLetters |> Map.tryFind x |> Option.map.TryFind y |> Option.map.Map.add i (c.Key, c.Value)
                 let playTile = List.fold (fun acc (c, (pid, (ch, i))) -> c::acc) st.playedTiles ms
-                
-                
-                let rec playLett (m: list<coord * (uint32 * (char * int))>)  =
-                    match st.playedLetters |> Map.tryFind (fst (fst (List.head (m))) |> int ) with
-                    | Some innerMap ->
-                         innerMap |> Map.tryFind (snd (fst (List.head m) ) |> int )
-                        |> function
-                        | Some _ -> st.playedLetters
-                        | None -> st.playedLetters |> Map.add (fst (fst (List.head m) ) |> int ) (innerMap |> Map.add (snd (fst (List.head (m)) ) |> int) (snd (snd (List.head (m))) ) )
-                    | None ->
-                        st.playedLetters |> (Map.add (fst (fst (List.head (m)) ) |> int ) (Map.empty |> Map.add (snd (fst (List.head (m)) ) |> int ) (snd (snd (List.head (m)) ) ))) 
-         
-               
+    
+                let rec playLett (m: list<coord * (uint32 * (char * int))>) =
+                    match m with 
+                    |[] -> st'.playedLetters
+                    |x::xs -> (addLetter (fst x) (snd (snd x))) (playLett xs)
 
                 
                 //use the pid:uint32 to search the pieces map for a value and add it to the played letters
                // let playLett = List.fold (Map.find pid pieces) st.playedLetters ms
-
+                debugPrint (sprintf "LETTT2: %A\n" st'.playedLetters)
                 debugPrint (sprintf "Played Tiles: %A\n" st'.playedTiles)
                 //take the 
                 aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers; playedTiles = playTile; playedLetters = playLett ms}             

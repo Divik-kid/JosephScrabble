@@ -222,11 +222,11 @@ module Scrabble =
             forcePrint ("Word: "   + (bestWord |> snd |> snd
                                       |> List.map fst
                                       |> String.Concat) + "\n")
-            forcePrint ("Move: "   + (bestWord |> snd |> fst |> string) + "\n")
-            forcePrint ("Points: " + (bestWord |> fst        |> string) + "\n")
+            forcePrint ("Move: "   + (bestWord |> snd |> fst |> fst |> string) + "\n")
+            forcePrint ("Points: " + (bestWord |> fst               |> string) + "\n")
             match bestWord with
             | n, _ when n < minScore -> None
-            | _, m                    -> Some (m |> fst)
+            | _, m                   -> Some (m |> fst)
             
         
         let move (st: State.state) : ((coord * (uint32 * (char * int))) list * MultiSet.MultiSet<uint32>) option =
@@ -278,7 +278,7 @@ module Scrabble =
 
                 debugPrint (sprintf "LETTT: %A\n" st.playedLetters)
                 debugPrint (sprintf "Played Tiles: %A\n" myPoints)
-                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers; playedTiles = playTiles ; playedLetters = playLett ms}  // This state needs to be updated
+                aux {st' with playerTurn = (st.playerTurn % st.numPlayers)  + 1u; playedTiles = playTiles ; playedLetters = playLett ms}  // This state needs to be updated
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)  
                 let st' = st // This state needs to be updated
@@ -297,13 +297,13 @@ module Scrabble =
                 debugPrint (sprintf "LETTT2: %A\n" st'.playedLetters)
                 debugPrint (sprintf "Played Tiles: %A\n" st'.playedTiles)
                 //take the 
-                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers; playedTiles = playTile; playedLetters = playLett ms}             
+                aux {st' with playerTurn = (st.playerTurn % st.numPlayers)  + 1u; playedTiles = playTile; playedLetters = playLett ms}             
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
                 let st' = st // This state needs to be updated
-                aux {st' with playerTurn = (st.playerTurn + 1u) % st.numPlayers}
+                aux {st' with playerTurn = (st.playerTurn % st.numPlayers)  + 1u}
             | RCM (CMChangeSuccess newPieces) ->
-                aux {st with playerTurn = (st.playerTurn + 1u) % st.numPlayers; hand = MultiSet.ofList newPieces}
+                aux {st with playerTurn = (st.playerTurn % st.numPlayers)  + 1u; hand = MultiSet.ofList newPieces}
             | RCM (CMGameOver _) -> ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st

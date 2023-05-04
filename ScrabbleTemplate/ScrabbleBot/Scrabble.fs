@@ -274,16 +274,13 @@ module Scrabble =
                     match m with 
                     |[] -> st'.playedLetters
                     |x::xs -> (addLetter (fst x) (snd (snd x))) (playLett xs)
-
-                let rec updateHand (h:MultiSet.MultiSet<uint32>)(p: list<uint32*uint32>)= 
-                    match p with 
-                    |[] -> st'.hand
-                    |x::xs -> List.fold (fun acc (x, k) -> MultiSet.add x k acc) h p
+                
+                let newHand = MultiSet.subtract (State.hand st) usedTiles |> MultiSet.sum (newPieces |> MultiSet.ofList)
 
                 debugPrint (sprintf "LETTT: %A\n" st'.playedLetters)
                 debugPrint (sprintf "Played Tiles: %A\n" myPoints)
                 debugPrint (sprintf "HAAAND: %A\n" st.hand)
-                aux {st' with playerTurn = (st.playerTurn % st.numPlayers) + 1u; playedTiles = playTiles ; playedLetters = playLett ms; hand = updateHand st.hand newPieces}  // This state needs to be updated
+                aux {st' with playerTurn = (st.playerTurn % st.numPlayers) + 1u; playedTiles = playTiles ; playedLetters = playLett ms; hand = newHand}  // This state needs to be updated
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)  
                 let st' = st // This state needs to be updated

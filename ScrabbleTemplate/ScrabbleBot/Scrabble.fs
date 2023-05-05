@@ -186,15 +186,46 @@ module Scrabble =
                                         let newMoves = (pos, (lId, (c, p)))::moves
                                         
                                         // TODO: Find and check validity of parallel word and add parallel word score to newScore
+                                        let rec getSideWord (dict: Dictionary.Dict) (pos: coord) (start: coord) (dir: coord) (isWord: bool) (word: word) (offset: int) (revved: bool) (score: (int * square) list) =
+                                            match getLetter pos st.playedLetters with
+                                            | Some (c, p) ->
+                                                match Dictionary.step c dict with
+                                                | Some (b, d) -> getSideWord d (pos ..+.. dir) start dir b (word@[(c, p)]) (offset |> incOffset) revved ((offset, Map.add Int32.MinValue (fun _ _ acc -> (acc + p) |> Success) Map.empty)::score)
+                                                | None -> (false, word@[(c, p)]), score
+                                            | None ->
+                                                match (revved, Dictionary.reverse dict) with
+                                                | _, Some (b, d) ->
+                                                    getSideWord d (start ..+.. (dir |> invCoord)) start (dir |> invCoord) b (word |> List.rev) (offset |> incOffset) true score
+                                                | true,  None ->
+                                                    (isWord, word), score
+                                                | false, None ->
+                                                    (isWord && (noLetter (start ..+.. (dir |> invCoord)) st.playedLetters), (word |> List.rev)), score
                                         
-                                        // hand-finishing bonus
-                                        let newScore = if MultiSet.isEmpty newHand then
-                                                            (offset, (Map.add Int32.MaxValue (fun _ _ acc -> (acc + 50) |> Success) Map.empty))::newScore
-                                                        else
-                                                            newScore
+                                        let sideDir =
+                                            match dir with
+                                            | x, y when x + y < 0 -> y, x
+                                            | x, y -> -y, -x
+                                        let mutable res = (true, []), []
+                                        match Dictionary.step c st.dict with
+                                        | Some (_, d) ->
+                                            res <- getSideWord d (pos ..+.. sideDir) pos sideDir false [c, p] 0 false [(0, sqr)]
+                                        | None -> None |> ignore
+                                        if res |> fst |> fst || res |> fst |> snd |> List.length <= 1 then
+                                            let newScore =
+                                                if res |> fst |> snd |> List.length <= 1 then
+                                                    newScore
+                                                else
+                                                    newScore
                                         
-                                        aux newDict (pos ..+.. dir) start dir newSt newMoves b newWord (usedHand |> MultiSet.addSingle lId) (offset |> incOffset) newScore
-                                        |> ignore
+                                            // hand-finishing bonus
+                                            let newScore = if MultiSet.isEmpty newHand then
+                                                                (offset, (Map.add Int32.MaxValue (fun _ _ acc -> (acc + 50) |> Success) Map.empty))::newScore
+                                                            else
+                                                                newScore
+                                                                
+                                            // Move to next square
+                                            aux newDict (pos ..+.. dir) start dir newSt newMoves b newWord (usedHand |> MultiSet.addSingle lId) (offset |> incOffset) newScore
+                                            |> ignore
                                         None) None
                                 |> ignore
                                 

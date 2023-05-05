@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open System.Runtime.InteropServices.JavaScript
 open Microsoft.FSharp.Collections
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
@@ -111,6 +112,7 @@ module Scrabble =
         | false -> noLetter (c ..+.. dir) m && noLetter (c ..+.. (invCoord dir)) m
     
     let playGame cstream (pieces: Map<uint32, tile>) (timeout: uint32 option) (st: State.state) =
+        let mutable (startTime: DateTime) = DateTime.Now
         let findWord (st: State.state) (starts: (coord * coord) list) =
             let mutable bestWord : int * (((coord * (uint32 * (char * int))) list * MultiSet.MultiSet<uint32>) * word) = (0, (([], MultiSet.empty), []))
             let rec aux (dict: Dictionary.Dict)
@@ -243,7 +245,9 @@ module Scrabble =
                 aux st.dict start start (dir |> invCoord) st [] false [] MultiSet.empty 0 [] |> ignore
             
             use cts = match timeout with
-                      | Some t -> new CancellationTokenSource((t |> float) * 0.98 |> int)
+                      | Some t ->
+                          let endTime = startTime.AddMilliseconds (t - 500u |> float)
+                          new CancellationTokenSource(endTime - DateTime.Now)
                       | None   -> new CancellationTokenSource()
             let po = ParallelOptions()
             po.CancellationToken <- cts.Token
@@ -296,6 +300,7 @@ module Scrabble =
             let msg = recv cstream
             debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) msg) // keep the debug lines. They are useful.
 
+            startTime <- DateTime.Now
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)

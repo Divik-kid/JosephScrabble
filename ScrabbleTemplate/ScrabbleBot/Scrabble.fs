@@ -130,14 +130,14 @@ module Scrabble =
                     |> List.map (fun (i, s) ->
                         s |> Map.toList
                         |> List.fold (fun acc (prio, sq) ->
-                            (prio, sq word i)::acc) [])
+                            (prio, sq w i)::acc) [])
                     |> List.fold (@) []
                     |> List.sortBy fst
                     |> List.map snd
                     |> List.fold (fun acc f ->
                         match f acc with
                         | Success i -> i
-                        | Failure _ -> failwith "Failed calculating points"(*This should never happen*)) 0
+                        | Failure e -> failwith "Failed calculating points"(*This should never happen*)) 0
                     
                 let incOffset i = i + if i <= 0 then -1 else 1
                     
@@ -185,7 +185,7 @@ module Scrabble =
                                         let newSt = { st with hand = newHand }
                                         let newMoves = (pos, (lId, (c, p)))::moves
                                         
-                                        // TODO: Find and check validity of parallel word and add parallel word score to newScore
+                                        // Find and check validity of parallel word and add parallel word score to newScore
                                         let rec getSideWord (dict: Dictionary.Dict) (pos: coord) (start: coord) (dir: coord) (isWord: bool) (word: word) (offset: int) (revved: bool) (score: (int * square) list) =
                                             match getLetter pos st.playedLetters with
                                             | Some (c, p) ->
@@ -195,7 +195,7 @@ module Scrabble =
                                             | None ->
                                                 match (revved, Dictionary.reverse dict) with
                                                 | _, Some (b, d) ->
-                                                    getSideWord d (start ..+.. (dir |> invCoord)) start (dir |> invCoord) b (word |> List.rev) (offset |> incOffset) true score
+                                                    getSideWord d (start ..+.. (dir |> invCoord)) start (dir |> invCoord) b (word |> List.rev) 1 true score
                                                 | true,  None ->
                                                     (isWord, word), score
                                                 | false, None ->
@@ -212,9 +212,10 @@ module Scrabble =
                                         | None -> None |> ignore
                                         if res |> fst |> fst || res |> fst |> snd |> List.length <= 1 then
                                             let newScore =
-                                                if res |> fst |> snd |> List.length <= 1 then
+                                                if res |> fst |> snd |> List.length > 1 then
+                                                    let sideScore = getScore (res |> fst |> snd) (res |> snd)
                                                     (0, Map.add Int32.MaxValue (fun _ _ acc ->
-                                                        (getScore (res |> fst |> snd) (res |> snd) + acc) |> Success) Map.empty)::newScore
+                                                        (sideScore + acc) |> Success) Map.empty)::newScore
                                                 else
                                                     newScore
                                         

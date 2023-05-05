@@ -213,7 +213,8 @@ module Scrabble =
                                         if res |> fst |> fst || res |> fst |> snd |> List.length <= 1 then
                                             let newScore =
                                                 if res |> fst |> snd |> List.length <= 1 then
-                                                    newScore
+                                                    (0, Map.add Int32.MaxValue (fun _ _ acc ->
+                                                        (getScore (res |> fst |> snd) (res |> snd) + acc) |> Success) Map.empty)::newScore
                                                 else
                                                     newScore
                                         
@@ -250,11 +251,11 @@ module Scrabble =
                 Parallel.ForEach (starts, po, startWord) |> ignore
             with
             | :? OperationCanceledException -> printfn "Timeout"
-            forcePrint ("Word: "   + (bestWord |> snd |> snd
+            (*forcePrint ("Word: "   + (bestWord |> snd |> snd
                                       |> List.map fst
                                       |> String.Concat) + "\n")
             forcePrint ("Move: "   + (bestWord |> snd |> fst |> fst |> string) + "\n")
-            forcePrint ("Points: " + (bestWord |> fst               |> string) + "\n")
+            forcePrint ("Points: " + (bestWord |> fst               |> string) + "\n")*)
             match bestWord with
             | n, _ when n < minScore -> None
             | _, m                   -> Some (m |> fst)
@@ -263,7 +264,7 @@ module Scrabble =
         let move (st: State.state) : ((coord * (uint32 * (char * int))) list * MultiSet.MultiSet<uint32>) option =
             let surroundCoord ((x, y): coord) : coord list =
                 [(x+1, y);(x-1, y);(x, y+1);(x, y-1)]
-            Print.printHand pieces (State.hand st)
+            //Print.printHand pieces (State.hand st)
             let wordStarts = List.fold (fun s -> surroundCoord >> (@) s) st.playedTiles st.playedTiles
                              |> List.distinct
                              |> (fun l -> if List.length st.playedTiles = 0 then [st.board.center] else l)

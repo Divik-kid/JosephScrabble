@@ -18,7 +18,7 @@ let spawnMultiples name dict bot =
 
 [<EntryPoint>]
 let main argv =
-    ScrabbleUtil.DebugPrint.toggleDebugPrint true // Change to false to supress debug output
+    ScrabbleUtil.DebugPrint.toggleDebugPrint false // Change to false to supress debug output
 
     System.Console.BackgroundColor <- System.ConsoleColor.White
     System.Console.ForegroundColor <- System.ConsoleColor.Black
@@ -51,8 +51,8 @@ let main argv =
     // Uncomment this line to call your client
     let (dictionary, time) =
         time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
-    //let players    = [("OxyphenButazone1", dictionary, Oxyphenbutazone.Scrabble.startGame); ("JosephScrabble", dictionary, JosephScrabble.Scrabble.startGame); ("OxyphenButazone2", dictionary, Oxyphenbutazone.Scrabble.startGame);]
-    let players = spawnMultiples "JosephScrabble" dictionary JosephScrabble.Scrabble.startGame 2
+    let players    = [("OxyphenButazone", dictionary, Oxyphenbutazone.Scrabble.startGame); ("JosephScrabble", dictionary, JosephScrabble.Scrabble.startGame);]
+    //let players = spawnMultiples "JosephScrabble" dictionary JosephScrabble.Scrabble.startGame 2
 
     // let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
 

@@ -337,17 +337,20 @@ module Scrabble =
                 debugPrint (sprintf "Played Tiles: %A\n" st'.playedTiles)
               
                 aux {st' with playerTurn = (st.playerTurn % st.numPlayers) + 1u; playedTiles = playTile; playedLetters = playLett ms}             
-            | RCM (CMPlayFailed (pid, ms)) ->
-                (* Failed play. Update your state *)
-                let st' = st // This state needs to be updated
-                aux {st' with playerTurn = (st.playerTurn % st.numPlayers)  + 1u}
+            
             | RCM (CMChangeSuccess (newPieces: (uint32 * uint32) list)) ->
                 aux {st with playerTurn = (st.playerTurn % st.numPlayers)  + 1u; hand = MultiSet.ofList newPieces}
-            | RCM (CMChange (id,tiles)) ->
+            | RCM (CMForfeit (playerId)) ->
+                let myIdUpdate = if playerId < st.playerNumber then st.playerNumber - 1u else st.playerNumber 
+
+                aux {st with playerTurn = ((st.playerTurn - 1u) % (st.numPlayers - 1u))  + 1u; numPlayers = st.numPlayers - 1u; playerNumber = myIdUpdate}
+            | RCM (CMPassed (_))
+            | RCM (CMTimeout (_))
+            | RCM (CMPlayFailed (_))
+            | RCM (CMChange (_)) ->
                 let st' = st 
                 aux {st' with playerTurn = (st.playerTurn % st.numPlayers)  + 1u}
             | RCM (CMGameOver _) -> ()
-            | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
             
